@@ -1,10 +1,11 @@
 # Boilerplate App (Symfony 7 + Docker)
 
 ## Quickstart (Dev)
+0. Pull latest code
 1. Copy env: `cp env/.env.dev.example env/.env.dev`
 2. Start stack: `make up`
 3. Install deps: `make install`
-4. Open: http://localhost:8080/health (should return JSON)
+4. Check health: http://localhost:8080/health
 
 Services:
 - App: http://localhost:8080
