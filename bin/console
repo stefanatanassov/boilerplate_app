@@ -10,7 +10,11 @@ if (!class_exists(Dotenv::class)) {
     throw new RuntimeException('Please run "composer install".');
 }
 
-(new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
+$envFile = dirname(__DIR__).'/.env';
+if (file_exists($envFile)) {
+    (new Dotenv())->bootEnv($envFile);
+}
+
 
 $kernel = new Kernel($_SERVER['APP_ENV'] ?? 'dev', (bool) ($_SERVER['APP_DEBUG'] ?? false));
 $application = new Application($kernel);

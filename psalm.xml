@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<psalm errorLevel="1" phpVersion="8.2">
+    <projectFiles>
+        <directory name="src"/>
+        <ignoreFiles>
+            <directory name="vendor"/>
+        </ignoreFiles>
+    </projectFiles>
+</psalm>
