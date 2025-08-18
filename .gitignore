@@ -1,15 +1,19 @@
 /vendor/
 var/
 /node_modules/
-/.env.local
-/.env
+
+# Local overrides
+.env.local
 .env.*.local
 .env.local.php
 .phpunit.result.cache
+
 /build/
 .env.test
 .env.*.backup
 .env.*.override
 .env.*.secrets
+
+# Our examples in env/ are tracked; the real ones are ignored
 env/.env.dev
 env/.env.prod

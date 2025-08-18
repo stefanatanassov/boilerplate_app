@@ -3,8 +3,9 @@ use Symfony\Component\Dotenv\Dotenv;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
-if (!class_exists(Dotenv::class)) {
-    throw new RuntimeException('Please run "composer install".');
+if (!isset($_SERVER['APP_ENV'])) {
+    if (class_exists(Dotenv::class)) {
+        (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
+    }
 }
 
-(new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
