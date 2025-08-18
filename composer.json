@@ -1,0 +1,33 @@
+{
+    "name": "acme/boilerplate_app",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/runtime": "*",
+        "symfony/orm-pack": "*",
+        "symfony/serializer-pack": "*",
+        "symfony/validator": "*",
+        "symfony/mailer": "*"
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/flex": true
+        }
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "^7.0"
+        }
+    }
+}

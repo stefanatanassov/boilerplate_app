@@ -1,0 +1,16 @@
+/vendor/
+var/
+/node_modules/
+/.env.local
+/.env
+.env.*.local
+.env.local.php
+.phpunit.result.cache
+/build/
+.env.dev
+.env.prod
+.env.test
+.env.*.backup
+.env.*.override
+.env.*.secrets
+composer.lock
