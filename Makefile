@@ -21,3 +21,12 @@ cc:
 
 health:
 	curl -sS http://localhost:8080/health || true
+
+stan:
+	$(COMPOSE_DEV) exec php vendor/bin/phpstan analyse -c phpstan.neon --no-progress
+
+psalm:
+	$(COMPOSE_DEV) exec php vendor/bin/psalm --no-cache
+
+cs-fix:
+	$(COMPOSE_DEV) exec php vendor/bin/php-cs-fixer fix --dry-run --diff

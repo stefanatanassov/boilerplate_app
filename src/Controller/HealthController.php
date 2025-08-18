@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+/** @psalm-suppress UnusedClass */
 final class HealthController
 {
     #[Route('/health', name: 'app_health', methods: ['GET'])]

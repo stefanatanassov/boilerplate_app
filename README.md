@@ -5,12 +5,17 @@
 1. Copy env: `cp env/.env.dev.example env/.env.dev`
 2. Start stack: `make up`
 3. Install deps: `make install`
-4. Check health: http://localhost:8080/health
+4. Check health: `make health` (or visit http://localhost:8080/health)
 
 Services:
 - App: http://localhost:8080
 - Mailpit: http://localhost:8025
 - MySQL: port 3307 (local)
+
+## Quality tooling
+- `make stan`
+- `make psalm`
+- `make cs-fix`
 
 ## Production
 Use `compose/docker-compose.prod.yml` with `env/.env.prod` (from `env/.env.prod.example`).
@@ -24,4 +29,5 @@ Provide DB creds and secure `APP_SECRET`.
 
 ## Notes
 - Symfony 7 skeleton + ORM pack
+- composer.lock is tracked for deterministic installs
 - No secrets committed; use env files per environment
