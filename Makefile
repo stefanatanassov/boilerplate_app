@@ -30,3 +30,10 @@ psalm:
 
 cs-fix:
 	$(COMPOSE_DEV) exec php vendor/bin/php-cs-fixer fix --dry-run --diff
+
+adminer:
+	$(COMPOSE_DEV) up -d adminer
+	@echo "Open: http://localhost:8081"
+
+down-adminer:
+	$(COMPOSE_DEV) stop adminer

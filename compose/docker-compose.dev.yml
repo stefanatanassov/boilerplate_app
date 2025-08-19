@@ -41,5 +41,17 @@ services:
     ports:
       - "8025:8025"
 
+  adminer:
+    image: adminer:latest
+    depends_on:
+      - db
+    environment:
+      # optional: set a theme, e.g. "pepa-linha"
+      # ADMINER_DESIGN: pepa-linha
+      # ADMINER_DEFAULT_SERVER lets Adminer prefill the server host
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - "8081:8080"
+
 volumes:
   db_data:
