@@ -133,3 +133,28 @@ If you connect from a host DB client (Sequel Ace, TablePlus, DBeaver):
 > Prefer a native client? Try:
 > - macOS: Sequel Ace (free), TablePlus (paid)
 > - Cross‑platform: DBeaver (free), DataGrip (paid)
+
+## Custom HTTPS dev domain
+
+We use [mkcert](https://github.com/FiloSottile/mkcert) to generate a local CA and TLS certs for a wildcard domain.
+
+### One-time setup (macOS)
+```bash
+brew install mkcert nss   # nss needed by Firefox
+```
+
+Use a custom domain base
+
+deploy.sh can provision certs and /etc/hosts entries:
+
+```bash
+./deploy.sh dev --domain-base dev.local.test
+# adds:
+# - TLS certs under tls/dev.local.test/
+# - 127.0.0.1 app.dev.local.test (and adminer/mail convenience hosts)
+# App available at: https://app.dev.local.test
+```
+
+Change later: just re-run with a new --domain-base new.local.test.
+
+Adminer and Mailpit stay on localhost:8081 / 8025 by default. You can optionally reverse-proxy them via Nginx in a future iteration.

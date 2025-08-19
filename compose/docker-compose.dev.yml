@@ -18,8 +18,10 @@ services:
       dockerfile: docker/nginx/Dockerfile
     volumes:
       - ../:/var/www/app
+      - ../tls/${DOMAIN_BASE:-dev.local.test}:/etc/nginx/certs:ro
     ports:
-      - "8080:80"
+      - "443:443"
+      - "8080:80"   # optional: keep http for quick checks
     depends_on:
       - php
 
