@@ -37,3 +37,11 @@ adminer:
 
 down-adminer:
 	$(COMPOSE_DEV) stop adminer
+e2e-install:
+	$(COMPOSE_DEV) run --rm e2e npm run e2e:install
+
+e2e:
+	$(COMPOSE_DEV) run --rm -e BASE_URL=$${BASE_URL:-http://nginx} e2e npm run e2e
+
+e2e-ui:
+	BASE_URL=$${BASE_URL:-http://localhost:8080} npm run e2e:ui
