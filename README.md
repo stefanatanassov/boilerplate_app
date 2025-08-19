@@ -102,3 +102,15 @@ What it does:
 - If the DB credentials change, update:
   - root .env (for host CLI)
   - env/.env.dev (used by docker-compose for containers)
+
+### Migrations behavior
+
+- `deploy.sh` will:
+  - Create the DB if missing: `doctrine:database:create --if-not-exists`
+  - Run `doctrine:migrations:migrate --allow-no-migration` so it **does not fail** when you have no migrations yet.
+- When you add entities and want a first migration:
+  ```bash
+  make bash
+  php bin/console make:migration
+  php bin/console doctrine:migrations:migrate
+  ```
