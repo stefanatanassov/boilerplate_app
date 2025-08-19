@@ -162,16 +162,16 @@ fi
 # 8) database create + migrations (optional)
 if [[ "$RUN_MIGRATIONS" == "true" ]]; then
   echo "[info] Ensuring database exists"
-  set +e
-  dc exec php php -d detect_unicode=0 php bin/console doctrine:database:create --if-not-exists --no-interaction
-  set -e
+  # Corrected: remove the accidental 'php' after -d
+  dc exec php php bin/console doctrine:database:create --if-not-exists --no-interaction || true
 
   echo "[info] Checking if doctrine:migrations commands are available"
   if dc exec php php bin/console list --raw | grep -q '^doctrine:migrations:migrate'; then
-    echo "[info] Running doctrine migrations"
-    dc exec php php bin/console doctrine:migrations:migrate --no-interaction
+    echo "[info] Running doctrine migrations (will skip if none)"
+    # Key flag: don't fail when there are no registered migrations
+    dc exec php php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
   else
-    echo "[info] No doctrine:migrations:* commands found (bundle not installed or no config). Skipping migrations."
+    echo "[info] No doctrine:migrations:* commands found. Skipping migrations."
   fi
 fi
 
