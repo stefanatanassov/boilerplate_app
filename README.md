@@ -61,3 +61,28 @@ Provide DB creds and secure `APP_SECRET`.
   php bin/console about
   ```
 
+
+## Deploy locally (one command)
+
+Basic usage:
+```bash
+./deploy.sh                # dev, pulls main, copies envs, rebuilds, installs, migrates, health-check
+```
+
+Options:
+```bash
+./deploy.sh dev --fresh            # drop volumes & rebuild
+./deploy.sh staging --branch release/next
+./deploy.sh prod --no-migrate
+```
+
+What it does:
+1. Pulls latest from the selected branch
+2. Ensures env files exist:
+   - env/.env.<env> (created from env/.env.<env>.example if missing)
+   - root .env for host CLI (dev-safe defaults)
+3. Restarts Docker stack for the environment
+4. Installs Composer deps inside php container
+5. Runs doctrine migrations (can be skipped with --no-migrate)
+6. Calls /health to verify
+
