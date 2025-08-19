@@ -25,11 +25,8 @@ services:
 
   db:
     image: mysql:8.4
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    env_file:
+      - ../env/.env.dev
     volumes:
       - db_data:/var/lib/mysql
       - ../docker/db/init:/docker-entrypoint-initdb.d
