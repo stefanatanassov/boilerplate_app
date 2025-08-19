@@ -114,3 +114,22 @@ What it does:
   php bin/console make:migration
   php bin/console doctrine:migrations:migrate
   ```
+
+## Database UI (Adminer)
+
+- URL: http://localhost:8081
+- Server: db        (inside Docker)
+- Username: app
+- Password: app
+- Database: app
+
+If you connect from a host DB client (Sequel Ace, TablePlus, DBeaver):
+- Host: 127.0.0.1
+- Port: 3307
+- Username: app
+- Password: app
+- Database: app
+
+> Prefer a native client? Try:
+> - macOS: Sequel Ace (free), TablePlus (paid)
+> - Cross‑platform: DBeaver (free), DataGrip (paid)
