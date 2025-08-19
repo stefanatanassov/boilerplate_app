@@ -55,5 +55,16 @@ services:
     ports:
       - "8081:8080"
 
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.46.0-jammy
+    working_dir: /work
+    volumes:
+      - ../:/work
+    environment:
+      # default BASE_URL; can be overridden at runtime
+      BASE_URL: http://nginx
+    depends_on:
+      - nginx
+
 volumes:
   db_data:

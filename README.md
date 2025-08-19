@@ -158,3 +158,30 @@ deploy.sh can provision certs and /etc/hosts entries:
 Change later: just re-run with a new --domain-base new.local.test.
 
 Adminer and Mailpit stay on localhost:8081 / 8025 by default. You can optionally reverse-proxy them via Nginx in a future iteration.
+
+## End‑to‑End tests (Playwright)
+
+### Quick start (in Docker)
+```bash
+make up
+make e2e-install
+make e2e                # BASE_URL defaults to http://nginx inside the dev network
+# or:
+BASE_URL=https://app.<your-domain> make e2e
+```
+
+Local headed mode (UI)
+
+```bash
+npm install
+npm run e2e:install
+BASE_URL=http://localhost:8080 npm run e2e:ui
+```
+
+Run E2E after deploy
+
+```bash
+./deploy.sh dev --domain-base myshop.local.test --no-build --no-tls --no-hosts --e2e
+```
+
+Artifacts are written to e2e-report/ (HTML reporter).

@@ -30,7 +30,7 @@ ENV_PROD_REAL="env/.env.prod"
 
 usage() {
   cat <<EOF2
-Usage: $0 [dev|staging|prod] [--branch BRANCH] [--fresh] [--no-migrate] [--no-build] [--domain-base DOMAIN] [--no-hosts] [--no-tls]
+Usage: $0 [dev|staging|prod] [--branch BRANCH] [--fresh] [--no-migrate] [--no-build] [--domain-base DOMAIN] [--no-hosts] [--no-tls] [--e2e]
 
 Examples:
   $0                   # defaults to dev
@@ -46,6 +46,7 @@ Flags:
   --domain-base  Override domain base (default depends on env)
   --no-hosts     Do not add /etc/hosts entries
   --no-tls       Skip TLS setup
+  --e2e          Run Playwright E2E tests after stack is up
 EOF2
 }
 
@@ -58,6 +59,7 @@ REBUILD="true"
 DOMAIN_BASE_OVERRIDE=""
 ADD_HOSTS="true"
 SETUP_TLS="true"
+RUN_E2E="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -68,6 +70,7 @@ while [[ $# -gt 0 ]]; do
     --domain-base) DOMAIN_BASE_OVERRIDE="${2:-}"; shift 2 ;;
     --no-hosts) ADD_HOSTS="false"; shift ;;
     --no-tls) SETUP_TLS="false"; shift ;;
+    --e2e) RUN_E2E="true"; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1"; usage; exit 1 ;;
   esac
@@ -239,6 +242,20 @@ if command -v curl >/dev/null 2>&1; then
   echo
 else
   echo "[warn] curl not found; skipping health check output"
+fi
+
+# 10) Optional E2E run
+if [[ "$RUN_E2E" == "true" ]]; then
+  echo "[info] Running E2E tests with Playwright"
+  # ensure playwright deps are installed in the e2e image
+  dc run --rm e2e npm run e2e:install
+  # prefer HTTPS custom domain if available in dev
+  if [[ "$ENVIRONMENT" == "dev" ]]; then
+    dc run --rm -e BASE_URL="https://${APP_HOST}" e2e npm run e2e || exit 7
+  else
+    # default to nginx inside compose
+    dc run --rm -e BASE_URL="http://nginx" e2e npm run e2e || exit 7
+  fi
 fi
 
 # URLs summary
