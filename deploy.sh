@@ -6,6 +6,11 @@ DEFAULT_BRANCH_DEV="main"
 DEFAULT_BRANCH_STAGING="development"
 DEFAULT_BRANCH_PROD="main"
 
+# domain defaults
+DEFAULT_DOMAIN_DEV="dev.local.test"
+DEFAULT_DOMAIN_STAGING="staging.local.test"
+DEFAULT_DOMAIN_PROD="local.test"
+
 HEALTH_URL_DEV="${HEALTH_URL_DEV:-http://localhost:8080/health}"
 HEALTH_URL_STAGING="${HEALTH_URL_STAGING:-http://localhost:8080/health}"
 HEALTH_URL_PROD="${HEALTH_URL_PROD:-http://localhost/health}"
@@ -25,7 +30,7 @@ ENV_PROD_REAL="env/.env.prod"
 
 usage() {
   cat <<EOF2
-Usage: $0 [dev|staging|prod] [--branch BRANCH] [--fresh] [--no-migrate] [--no-build]
+Usage: $0 [dev|staging|prod] [--branch BRANCH] [--fresh] [--no-migrate] [--no-build] [--domain-base DOMAIN] [--no-hosts] [--no-tls]
 
 Examples:
   $0                   # defaults to dev
@@ -38,6 +43,9 @@ Flags:
   --fresh        Down stack with -v (drop volumes) before up
   --no-migrate   Skip doctrine migrations
   --no-build     Do not rebuild images on up
+  --domain-base  Override domain base (default depends on env)
+  --no-hosts     Do not add /etc/hosts entries
+  --no-tls       Skip TLS setup
 EOF2
 }
 
@@ -47,6 +55,9 @@ BRANCH_OVERRIDE=""
 FRESH="false"
 RUN_MIGRATIONS="true"
 REBUILD="true"
+DOMAIN_BASE_OVERRIDE=""
+ADD_HOSTS="true"
+SETUP_TLS="true"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -54,6 +65,9 @@ while [[ $# -gt 0 ]]; do
     --fresh) FRESH="true"; shift ;;
     --no-migrate) RUN_MIGRATIONS="false"; shift ;;
     --no-build) REBUILD="false"; shift ;;
+    --domain-base) DOMAIN_BASE_OVERRIDE="${2:-}"; shift 2 ;;
+    --no-hosts) ADD_HOSTS="false"; shift ;;
+    --no-tls) SETUP_TLS="false"; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1"; usage; exit 1 ;;
   esac
@@ -89,6 +103,14 @@ case "$ENVIRONMENT" in
   staging) ENV_EXAMPLE="$ENV_STAGING_EXAMPLE"; ENV_REAL="$ENV_STAGING_REAL" ;;
   prod)    ENV_EXAMPLE="$ENV_PROD_EXAMPLE"; ENV_REAL="$ENV_PROD_REAL" ;;
 esac
+
+# decide domain base
+case "$ENVIRONMENT" in
+  dev)     DOMAIN_BASE="${DOMAIN_BASE_OVERRIDE:-$DEFAULT_DOMAIN_DEV}" ;;
+  staging) DOMAIN_BASE="${DOMAIN_BASE_OVERRIDE:-$DEFAULT_DOMAIN_STAGING}" ;;
+  prod)    DOMAIN_BASE="${DOMAIN_BASE_OVERRIDE:-$DEFAULT_DOMAIN_PROD}" ;;
+esac
+export DOMAIN_BASE
 
 # helper: docker compose vs docker-compose
 dc() {
@@ -129,6 +151,35 @@ DATABASE_URL="mysql://app:app@127.0.0.1:3307/app?serverVersion=8.4&charset=utf8m
 MAILER_DSN=smtp://127.0.0.1:1025
 REDIS_URL=redis://127.0.0.1:6379
 EOF3
+fi
+
+# TLS setup and hosts
+APP_HOST="app.${DOMAIN_BASE}"
+ADMINER_HOST="adminer.${DOMAIN_BASE}"
+MAILPIT_HOST="mail.${DOMAIN_BASE}"
+
+# TLS setup (mkcert) for dev/staging (skip for prod if you use real certs)
+if [[ "$SETUP_TLS" == "true" ]]; then
+  if [[ "$ENVIRONMENT" != "prod" ]]; then
+    echo "[info] Setting up TLS for ${DOMAIN_BASE}"
+    ./scripts/setup-tls.sh "$DOMAIN_BASE"
+  else
+    echo "[info] Skipping TLS generation in prod mode (expect external certs)."
+  fi
+fi
+
+# /etc/hosts entries (app + optional helpers)
+if [[ "$ADD_HOSTS" == "true" ]]; then
+  echo "[info] Adding /etc/hosts entries (requires sudo)"
+  add_host() {
+    local host="$1"
+    if ! grep -qE "^[0-9.]+\s+${host}(\s|$)" /etc/hosts 2>/dev/null; then
+      echo "127.0.0.1 ${host}" | sudo tee -a /etc/hosts >/dev/null || true
+    fi
+  }
+  add_host "$APP_HOST"
+  add_host "$ADMINER_HOST"
+  add_host "$MAILPIT_HOST"
 fi
 
 # 5) restart stack
@@ -189,5 +240,18 @@ if command -v curl >/dev/null 2>&1; then
 else
   echo "[warn] curl not found; skipping health check output"
 fi
+
+# URLs summary
+APP_HTTPS_URL="https://${APP_HOST}"
+APP_HTTP_URL="http://${APP_HOST}"
+ADMINER_URL="http://localhost:8081"
+MAILPIT_URL="http://localhost:8025"
+
+echo ""
+echo "[urls] Environment: $ENVIRONMENT   Domain base: $DOMAIN_BASE"
+echo "[urls] App (HTTPS):  ${APP_HTTPS_URL}"
+echo "[urls] App (HTTP):   ${APP_HTTP_URL}  (redirects to HTTPS)"
+echo "[urls] Adminer:      ${ADMINER_URL}"
+echo "[urls] Mailpit:      ${MAILPIT_URL}"
 
 echo "[success] Deployment completed for environment: $ENVIRONMENT"
