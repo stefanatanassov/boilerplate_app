@@ -31,3 +31,22 @@ Provide DB creds and secure `APP_SECRET`.
 - Symfony 7 skeleton + ORM pack
 - composer.lock is tracked for deterministic installs
 - No secrets committed; use env files per environment
+
+## CLI & Environment Variables
+- The project includes a committed `.env` with safe dev defaults so `php bin/console` works locally.
+- For overrides, create `.env.local` (gitignored).
+- In Docker, environment variables come from docker-compose. To run CLI inside container:
+
+  ```bash
+  make bash
+  php bin/console about
+  ```
+
+## First run
+```bash
+cp env/.env.dev.example env/.env.dev
+make up
+make install
+php bin/console about
+open http://localhost:8080/health
+```
