@@ -86,3 +86,19 @@ What it does:
 5. Runs doctrine migrations (can be skipped with --no-migrate)
 6. Calls /health to verify
 
+
+### Database & Migrations
+
+- The project uses Doctrine Migrations. The `deploy.sh` script:
+  - Ensures the DB exists: `doctrine:database:create --if-not-exists`
+  - Runs migrations **only if** the migrations command is available.
+
+- If you add entities and want an initial migration:
+  ```bash
+  make bash
+  php bin/console make:migration
+  php bin/console doctrine:migrations:migrate
+  ```
+- If the DB credentials change, update:
+  - root .env (for host CLI)
+  - env/.env.dev (used by docker-compose for containers)

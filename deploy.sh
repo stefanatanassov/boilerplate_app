@@ -159,10 +159,20 @@ if grep -q "services:" "$COMPOSE_FILE"; then
   dc exec php composer install --no-interaction --prefer-dist --optimize-autoloader
 fi
 
-# 8) migrations (optional)
+# 8) database create + migrations (optional)
 if [[ "$RUN_MIGRATIONS" == "true" ]]; then
-  echo "[info] Running doctrine migrations (if configured)"
-  dc exec php php bin/console doctrine:migrations:migrate --no-interaction || true
+  echo "[info] Ensuring database exists"
+  set +e
+  dc exec php php -d detect_unicode=0 php bin/console doctrine:database:create --if-not-exists --no-interaction
+  set -e
+
+  echo "[info] Checking if doctrine:migrations commands are available"
+  if dc exec php php bin/console list --raw | grep -q '^doctrine:migrations:migrate'; then
+    echo "[info] Running doctrine migrations"
+    dc exec php php bin/console doctrine:migrations:migrate --no-interaction
+  else
+    echo "[info] No doctrine:migrations:* commands found (bundle not installed or no config). Skipping migrations."
+  fi
 fi
 
 # 9) health check
