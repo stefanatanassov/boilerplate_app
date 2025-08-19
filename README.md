@@ -1,11 +1,30 @@
 # Boilerplate App (Symfony 7 + Docker)
 
-## Quickstart (Dev)
-0. Pull latest code
-1. Copy env: `cp env/.env.dev.example env/.env.dev`
-2. Start stack: `make up`
-3. Install deps: `make install`
-4. Check health: `make health` (or visit http://localhost:8080/health)
+## Run Locally (Dev)
+
+1) Copy envs (creates an untracked env for docker):
+   cp env/.env.dev.example env/.env.dev
+
+2) Start stack:
+   make up
+   # first run: MySQL may take ~10–20s to initialize
+
+3) Install PHP deps inside the php container:
+   make install
+
+4) Check health:
+   open http://localhost:8080/health
+   # expect: {"status":"ok","env":"dev","db":true}
+
+### Tips
+- If you see docker warnings about MYSQL_* being unset, ensure `compose/docker-compose.dev.yml`
+  has `env_file: ../env/.env.dev` under both `php` and `db` services.
+- If `db:false` persists:
+  - Recreate with a clean volume so MySQL initializes with the new creds:
+    docker compose -f compose/docker-compose.dev.yml down -v
+    docker compose -f compose/docker-compose.dev.yml up -d
+  - Watch DB logs:
+    docker compose -f compose/docker-compose.dev.yml logs -f db
 
 Services:
 - App: http://localhost:8080
@@ -42,11 +61,3 @@ Provide DB creds and secure `APP_SECRET`.
   php bin/console about
   ```
 
-## First run
-```bash
-cp env/.env.dev.example env/.env.dev
-make up
-make install
-php bin/console about
-open http://localhost:8080/health
-```
